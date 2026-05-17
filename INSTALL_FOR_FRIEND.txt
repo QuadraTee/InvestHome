@@ -1,31 +1,23 @@
 INVESTHOME FINANCE TRACKER v2.6.0 - EASY INSTALL
 =================================================
 
-1) Copy the zip to your Linux server/LXC.
+GitHub install:
 
-2) Unzip it:
+   git clone https://github.com/domclifton/InvestHome.git
+   cd InvestHome
+   chmod +x scripts/install.sh scripts/start.sh scripts/backup_db.sh
+   ./scripts/install.sh
+   ./scripts/start.sh
 
-   unzip finance_tracker_v2.6.0_trading212_modern_ui.zip
-   cd finance_tracker_v2.6.0_trading212_modern_ui
-
-3) Create a Python virtual environment:
+Manual install:
 
    python3 -m venv venv
    source venv/bin/activate
-
-4) Install requirements:
-
    pip install -r requirements.txt
-
-5) Create the environment file:
-
    cp .env.example .env
-
-6) Start the app:
-
    python3 app.py
 
-7) Open it in a browser:
+Open it in a browser:
 
    http://SERVER-IP:5000
 
@@ -47,11 +39,11 @@ Keep these files:
    finance.db
    .env
 
-Overwrite everything else with the new version, then restart:
+Before updating:
 
-   pkill -f "python3 app.py"
-   source venv/bin/activate
-   python3 app.py
+   ./scripts/backup_db.sh
+
+Then overwrite/pull the app files and restart.
 
 RESETTING THE APP
 =================
@@ -61,14 +53,12 @@ To start from fresh data:
    rm finance.db
    python3 app.py
 
-BACKUP
-======
+DO NOT COMMIT
+=============
 
-Before updating:
+Do not commit:
 
-   cp finance.db finance_backup_$(date +%F).db
+   .env
+   finance.db
 
-
-Version v2.6.0 note:
-- Navigation pages preload on hover/touch for faster perceived page loads.
-- Trading 212 syncing is still manual to avoid API rate limits.
+These are already ignored by .gitignore.
