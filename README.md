@@ -1,0 +1,2 @@
+# FinanceDash
+Selfhosted Wealth Tracker
