@@ -3,8 +3,8 @@
 <div class="page-header">
     <div>
         <p class="eyebrow">Performance</p>
-        <h1>Investment Growth Over Time</h1>
-        <p class="muted mb-0">Blue shows your money paid in. Green shows the current value. When green sits above blue, you are in profit.</p>
+        <h1>Long-Term Investment Growth Over Time</h1>
+        <p class="muted mb-0">The first chart combines Stocks and Shares ISA, Lifetime ISA, and Pension. The following charts break each area out separately. Blue shows money paid in / opening baseline; green shows current value.</p>
     </div>
 </div>
 
@@ -26,13 +26,15 @@
             </div>
 
             <div class="performance-legend">
-                <span><i class="legend-blue"></i>Contributions / Money In</span>
+                <span><i class="legend-blue"></i>Contributions / Baseline</span>
                 <span><i class="legend-green"></i>Current Value</span>
             </div>
 
             <div class="svg-chart-wrap">
-                <svg viewBox="0 0 {{ chart.svg.width }} {{ chart.svg.height }}" preserveAspectRatio="none" role="img" aria-label="{{ chart.title }} chart">
+                <svg class="performance-svg" width="{{ chart.svg.width }}" height="{{ chart.svg.height }}" viewBox="0 0 {{ chart.svg.width }} {{ chart.svg.height }}" role="img" aria-label="{{ chart.title }} chart">
                     <rect x="0" y="0" width="{{ chart.svg.width }}" height="{{ chart.svg.height }}" fill="transparent"></rect>
+                    <line x1="{{ chart.svg.left }}" y1="{{ chart.svg.top }}" x2="{{ chart.svg.left }}" y2="{{ chart.svg.plot_bottom }}" class="chart-axis"></line>
+                    <line x1="{{ chart.svg.left }}" y1="{{ chart.svg.plot_bottom }}" x2="{{ chart.svg.plot_right }}" y2="{{ chart.svg.plot_bottom }}" class="chart-axis"></line>
 
                     {% for tick in chart.svg.ticks %}
                         <line x1="{{ chart.svg.left }}" y1="{{ tick.y }}" x2="{{ chart.svg.plot_right }}" y2="{{ tick.y }}" class="chart-grid"></line>
@@ -41,7 +43,7 @@
 
                     {% for tick in chart.svg.x_ticks %}
                         <line x1="{{ tick.x }}" y1="{{ chart.svg.top }}" x2="{{ tick.x }}" y2="{{ chart.svg.plot_bottom }}" class="chart-grid-vertical"></line>
-                        <text x="{{ tick.x }}" y="{{ chart.svg.height - 12 }}" text-anchor="middle" class="chart-label">{{ tick.label }}</text>
+                        <text x="{{ tick.x }}" y="{{ chart.svg.height - 18 }}" text-anchor="{{ tick.anchor }}" class="chart-label chart-x-label">{{ tick.label }}</text>
                     {% endfor %}
 
                     {% if chart.svg.fill_polygon %}

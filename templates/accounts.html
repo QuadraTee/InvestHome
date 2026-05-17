@@ -38,7 +38,7 @@
     <h5>Account Balances</h5>
     <div class="table-responsive">
         <table class="table table-hover align-middle">
-            <thead><tr><th>Name</th><th>Category</th><th>Type</th><th class="text-end">Value</th><th>Add / Remove</th><th>Update Total Value</th></tr></thead>
+            <thead><tr><th>Name</th><th>Category</th><th>Type</th><th class="text-end">Value</th><th>Add / Remove</th><th>Update Total Value</th><th class="text-end">Actions</th></tr></thead>
             <tbody>
             {% for account in accounts %}
             <tr>
@@ -80,10 +80,49 @@
                     <span class="muted">Update bullion holdings/prices</span>
                     {% endif %}
                 </td>
+                <td class="text-end">
+                    {% if account.account_type != 'Physical Bullion' %}
+                    <form method="post" action="{{ url_for('archive_account') }}" onsubmit="return confirm('Delete this account from the active list? Transactions and snapshots will be kept.');">
+                        <input type="hidden" name="account_id" value="{{ account.id }}">
+                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                    {% else %}
+                    <span class="muted small">Locked</span>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
 </section>
+
+{% if archived_accounts %}
+<section class="panel mt-4">
+    <h5>Deleted / Archived Accounts</h5>
+    <p class="small muted">These accounts are hidden from the active account list. Their transactions and snapshots are kept for history/statistics.</p>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>Name</th><th>Category</th><th>Type</th><th class="text-end">Last Value</th><th>Deleted At</th><th class="text-end">Action</th></tr></thead>
+            <tbody>
+            {% for account in archived_accounts %}
+            <tr>
+                <td>{{ account.name }}</td>
+                <td>{{ account.account_type }}</td>
+                <td>{{ account.term_type }}</td>
+                <td class="text-end">{{ account.current_value|money }}</td>
+                <td>{{ account.archived_at }}</td>
+                <td class="text-end">
+                    <form method="post" action="{{ url_for('restore_account') }}">
+                        <input type="hidden" name="account_id" value="{{ account.id }}">
+                        <button class="btn btn-sm btn-outline-primary">Restore</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
 {% endblock %}

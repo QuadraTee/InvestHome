@@ -1,105 +1,81 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="page-header">
+<div class="page-title-block">
     <div>
-        <p class="eyebrow">Accessible overview</p>
-        <h1>Accessible Finance Dashboard</h1>
+        <h1>Finance Dashboard</h1>
+        <p>Welcome back. Here’s your financial overview.</p>
     </div>
-    <a class="btn btn-outline-light" href="{{ url_for('export_transactions') }}">Export CSV</a>
 </div>
 
-<div class="metric-grid">
+<div class="modern-kpi-grid">
     {% if total_all_assets > 0 %}
-    <div class="metric-card accent"><span>Total Net Worth</span><strong>{{ total_all_assets|money }}</strong><small>Accessible + pension + property equity</small></div>
+    <section class="kpi-card kpi-large">
+        <div class="kpi-icon blue">↗</div>
+        <div><span>Total Net Worth</span><strong>{{ total_all_assets|money }}</strong><em>Includes investments, pension, property equity and cash</em></div>
+    </section>
     {% endif %}
-
-    {% if total > 0 %}
-    <div class="metric-card"><span>Accessible Net Worth</span><strong>{{ total|money }}</strong></div>
-    {% endif %}
-
-    {% if emergency > 0 %}
-    <div class="metric-card"><span>Emergency Fund</span><strong>{{ emergency|money }}</strong></div>
-    {% endif %}
-
-    {% if liquid > 0 %}
-    <div class="metric-card"><span>Liquid</span><strong>{{ liquid|money }}</strong><small>Uses account Type dropdown</small></div>
-    {% endif %}
-
-    {% if short_term > 0 %}
-    <div class="metric-card"><span>Short Term</span><strong>{{ short_term|money }}</strong></div>
-    {% endif %}
-
-    {% if mid_term > 0 %}
-    <div class="metric-card"><span>Mid Term</span><strong>{{ mid_term|money }}</strong></div>
-    {% endif %}
-
-    {% if long_term > 0 %}
-    <div class="metric-card"><span>Long Term</span><strong>{{ long_term|money }}</strong><small>Excludes pension</small></div>
-    {% endif %}
-
-    {% if pension > 0 %}
-    <div class="metric-card"><span>Pension</span><strong>{{ pension|money }}</strong><small><a href="{{ url_for('pension_dashboard') }}">View retirement dashboard</a></small></div>
-    {% endif %}
-
-    {% if property_equity > 0 %}
-    <div class="metric-card"><span>Property Equity</span><strong>{{ property_equity|money }}</strong><small><a href="{{ url_for('property_page') }}">View property</a></small></div>
-    {% endif %}
-
-    {% if total_contributions > 0 %}
-    <div class="metric-card"><span>Net Contributions</span><strong>{{ total_contributions|money }}</strong></div>
-    {% endif %}
-
-    {% if total_growth != 0 %}
-    <div class="metric-card"><span>Growth / Change</span><strong class="{{ 'positive' if total_growth >= 0 else 'negative' }}">{{ total_growth|money }}</strong><small>{{ '%.2f'|format(total_growth_pct) }}%</small></div>
-    {% endif %}
+    {% if liquid > 0 %}<section class="kpi-card"><div class="kpi-icon blue">◌</div><div><span>Liquid</span><strong>{{ liquid|money }}</strong><small>▲ vs last 7 days</small></div></section>{% endif %}
+    {% if emergency > 0 %}<section class="kpi-card"><div class="kpi-icon red">◇</div><div><span>Emergency</span><strong>{{ emergency|money }}</strong><small>▲ vs last 7 days</small></div></section>{% endif %}
+    {% if short_term > 0 %}<section class="kpi-card"><div class="kpi-icon amber">□</div><div><span>Short Term</span><strong>{{ short_term|money }}</strong><small>▲ vs last 7 days</small></div></section>{% endif %}
+    {% if mid_term > 0 %}<section class="kpi-card"><div class="kpi-icon green">◔</div><div><span>Mid Term</span><strong>{{ mid_term|money }}</strong><small>▲ vs last 7 days</small></div></section>{% endif %}
+    {% if long_term > 0 %}<section class="kpi-card"><div class="kpi-icon purple">⌛</div><div><span>Long Term</span><strong>{{ long_term|money }}</strong><small>▲ vs last 7 days</small></div></section>{% endif %}
+    {% if pension > 0 %}<section class="kpi-card"><div class="kpi-icon violet">♙</div><div><span>Pension</span><strong>{{ pension|money }}</strong><small>Retirement dashboard</small></div></section>{% endif %}
+    {% if property_equity > 0 %}<section class="kpi-card"><div class="kpi-icon teal">⌂</div><div><span>Property Equity</span><strong>{{ property_equity|money }}</strong><small>{{ '%.1f'|format(mortgage_ltv) }}% mortgage LTV</small></div></section>{% endif %}
 </div>
 
-<div class="row g-4 mt-1">
-    <div class="col-lg-8">
-        <section class="panel">
-            <h5>Accessible Net Worth Over Time</h5>
-            <canvas id="netWorthChart" height="120"></canvas>
-        </section>
-    </div>
-    <div class="col-lg-4">
-        <section class="panel">
-            <h5>Allocation</h5>
-            <canvas id="categoryChart" height="240"></canvas>
-        </section>
-    </div>
-</div>
+<div class="dashboard-grid mt-4">
+    <section class="glass-card networth-panel">
+        <div class="panel-title"><h3>Net Worth Over Time</h3><span class="pill">6M</span></div>
+        <canvas id="netWorthChart" height="130"></canvas>
+    </section>
+    <section class="glass-card allocation-panel">
+        <div class="panel-title"><h3>Allocation</h3><span class="pill">By Current Value</span></div>
+        <canvas id="categoryChart" height="235"></canvas>
+    </section>
 
-<div class="row g-4 mt-1">
-    <div class="col-lg-7">
-        <section class="panel">
-            <div class="d-flex justify-content-between align-items-center"><h5>Accounts</h5><a href="{{ url_for('performance') }}" class="small">View performance</a></div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead><tr><th>Account</th><th>Category</th><th>Type</th><th class="text-end">Value</th></tr></thead>
-                    <tbody>
-                    {% for account in accounts if account.current_value > 0 %}
-                        <tr><td>{{ account.name }}</td><td>{{ account.account_type }}</td><td>{{ account.term_type }}</td><td class="text-end">{{ account.current_value|money }}</td></tr>
-                    {% else %}
-                        <tr><td colspan="4" class="muted">No accounts with a value greater than £0 yet.</td></tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </div>
-    <div class="col-lg-5">
-        <section class="panel">
-            <h5>Recent Transactions</h5>
-            {% for tx in recent_transactions %}
-                <div class="feed-item">
-                    <div><strong>{{ tx.account_name }}</strong><small>{{ tx.created_at }}</small></div>
-                    <span class="{{ 'positive' if tx.amount >= 0 else 'negative' }}">{{ tx.amount|money }}</span>
-                </div>
-            {% else %}
-                <p class="muted">No transactions yet.</p>
-            {% endfor %}
-        </section>
-    </div>
+    <section class="glass-card mini-panel">
+        <div class="panel-title"><h3>Investment Growth</h3><a href="{{ url_for('performance') }}">View</a></div>
+        <div class="two-stat">
+            <div><span>Contributions</span><strong>{{ total_contributions|money }}</strong></div>
+            <div><span>Growth</span><strong class="positive">{{ total_growth|money }}</strong></div>
+        </div>
+        <div class="mini-line"><span></span></div>
+    </section>
+
+    <section class="glass-card recent-panel">
+        <div class="panel-title"><h3>Recent Transactions</h3><a href="{{ url_for('transactions') }}">View all</a></div>
+        {% for tx in recent_transactions %}
+        <div class="transaction-row"><div class="tx-icon">{{ tx.account_name[:1] }}</div><div><strong>{{ tx.account_name }}</strong><small>{{ tx.created_at }}</small></div><span class="{{ 'positive' if tx.amount >= 0 else 'negative' }}">{{ tx.amount|money }}</span></div>
+        {% else %}<p class="muted">No transactions yet.</p>{% endfor %}
+    </section>
+
+    <section class="glass-card side-stack">
+        <h3>Budget Snapshot</h3>
+        <div class="budget-cards">
+            <div class="budget-chip"><strong>Solo</strong><span>Left to spend</span><b>{{ solo_left|money }}</b></div>
+            <div class="budget-chip purple"><strong>Couple</strong><span>Left to spend</span><b>{{ couple_left|money }}</b></div>
+        </div>
+        <hr>
+        <h3>Property</h3>
+        <div class="property-row"><div><span>Home Value</span><strong>{{ property_home_value|money }}</strong></div><div><span>Mortgage Left</span><strong>{{ property_mortgage_left|money }}</strong></div><div><span>Equity</span><strong class="positive">{{ property_equity|money }}</strong></div></div>
+        <div class="progress-line"><span style="width: {{ mortgage_ltv if mortgage_ltv < 100 else 100 }}%"></span></div>
+    </section>
+
+    <section class="glass-card t212-card">
+        <div class="panel-title"><h3>Trading 212</h3><span class="badge-soft">Synced</span></div>
+        <div class="three-stat"><div><span>Holdings</span><strong>{{ t212_holdings_value|money }}</strong></div><div><span>Cash</span><strong>{{ t212_cash_value|money }}</strong></div><div><span>Total</span><strong>{{ t212_total|money }}</strong></div></div>
+        <a class="btn btn-outline-primary btn-sm mt-3" href="{{ url_for('trading212_page') }}">Open Trading 212 ↗</a>
+    </section>
+
+    <section class="glass-card bullion-card">
+        <div class="panel-title"><h3>Bullion</h3><a href="{{ url_for('bullion') }}">Details</a></div>
+        <div class="three-stat"><div><span>Gold</span><strong>{{ bullion_gold|money }}</strong></div><div><span>Silver</span><strong>{{ bullion_silver|money }}</strong></div><div><span>Total</span><strong>{{ bullion_total|money }}</strong></div></div>
+    </section>
+
+    <section class="glass-card quick-card">
+        <h3>Quick Actions</h3>
+        <div class="quick-actions"><a href="{{ url_for('accounts') }}">＋<span>Add Account</span></a><a href="{{ url_for('budget') }}">▣<span>Budget</span></a><a href="{{ url_for('export_transactions') }}">⇩<span>Export CSV</span></a></div>
+    </section>
 </div>
 
 <script>
@@ -107,17 +83,18 @@ const labels = {{ labels | safe }};
 const netWorthData = {{ networth_data | safe }};
 const categoryLabels = {{ category_labels | safe }};
 const categoryData = {{ category_data | safe }};
-
+const pounds = value => '£' + Number(value || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+Chart.defaults.font.family = 'Helvetica, Arial, sans-serif';
+Chart.defaults.color = '#667085';
 new Chart(document.getElementById('netWorthChart'), {
     type: 'line',
-    data: { labels, datasets: [{ label: 'Accessible Net Worth', data: netWorthData, tension: 0.35, fill: true }] },
-    options: { plugins: { legend: { labels: { color: '#475467' } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': £' + Number(ctx.parsed.y).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) } } }, scales: { x: { ticks: { color: '#667085' } }, y: { ticks: { color: '#667085', callback: value => '£' + Number(value).toLocaleString() } } } }
+    data: { labels, datasets: [{ label: 'Net Worth', data: netWorthData, tension: 0.38, borderWidth: 3, pointRadius: 4, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.12)', fill: true }] },
+    options: { responsive: true, plugins: { legend: { display: true }, tooltip: { callbacks: { label: ctx => 'Net Worth: ' + pounds(ctx.parsed.y) } } }, scales: { x: { grid: { color: '#eef2f7' } }, y: { grid: { color: '#eef2f7' }, ticks: { callback: value => '£' + Number(value).toLocaleString() } } } }
 });
-
 new Chart(document.getElementById('categoryChart'), {
     type: 'doughnut',
-    data: { labels: categoryLabels, datasets: [{ data: categoryData }] },
-    options: { plugins: { legend: { labels: { color: '#475467' } } } }
+    data: { labels: categoryLabels, datasets: [{ data: categoryData, borderWidth: 3, backgroundColor: ['#2563eb','#14b8a6','#f59e0b','#f97316','#8b5cf6','#a855f7','#22c55e','#f43f5e'] }] },
+    options: { cutout: '62%', plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + pounds(ctx.parsed) } } } }
 });
 </script>
 {% endblock %}

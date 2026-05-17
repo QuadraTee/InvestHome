@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="page-header"><div><p class="eyebrow">Configuration</p><h1>Settings</h1></div></div>
+<div class="page-header"><div><p class="eyebrow">Configuration</p><h1>Settings</h1><p class="subtle mb-0">App-wide settings, integrations, and sync logs.</p></div></div>
 
-<section class="panel">
+<section class="panel mb-4">
     <h5>Metal Pricing</h5>
     <p class="muted">Live prices use GoldAPI when GOLDAPI_KEY is set. Manual prices are used as fallback.</p>
     <form method="post" class="row g-3">
@@ -21,10 +21,48 @@
             </div>
         </div>
         <div class="col-md-3 d-flex align-items-end">
-            <button class="btn btn-primary w-100">Save</button>
+            <button class="btn btn-primary w-100">Save Metal Settings</button>
         </div>
     </form>
     <hr>
-    <p>GoldAPI key detected: <strong>{{ 'Yes' if has_goldapi_key else 'No' }}</strong></p>
+    <p class="mb-0">GoldAPI key detected: <strong>{{ 'Yes' if has_goldapi_key else 'No' }}</strong></p>
 </section>
+
+<div class="settings-grid">
+    <section class="panel">
+        <div class="panel-title"><h3>Trading 212 Connection</h3><span class="badge-soft blue">Read-only</span></div>
+        <p class="muted">Trading 212 settings live here now. The Trading 212 page is kept focused on synced holdings and portfolio data.</p>
+        {% if t212_settings.rate_limit_reset_at %}
+            <div class="soft-warning mb-3">Rate limited. Try again after <strong>{{ t212_settings.rate_limit_reset_at }}</strong>.</div>
+        {% endif %}
+        <form method="post" action="{{ url_for('trading212_update_settings') }}" class="connection-form">
+            <label>Environment</label>
+            <select class="form-select" name="environment"><option value="demo" {% if t212_settings.environment == 'demo' %}selected{% endif %}>Demo</option><option value="live" {% if t212_settings.environment == 'live' %}selected{% endif %}>Live</option></select>
+            <label>Sync target account</label>
+            <select class="form-select" name="target_account_name">{% for account in t212_accounts %}<option value="{{ account.name }}" {% if account.name == t212_settings.target_account_name %}selected{% endif %}>{{ account.name }}</option>{% endfor %}</select>
+            <label>Auto-update account value</label>
+            <select class="form-select" name="auto_update_account"><option value="1" {% if t212_settings.auto_update_account %}selected{% endif %}>Yes</option><option value="0" {% if not t212_settings.auto_update_account %}selected{% endif %}>No</option></select>
+            <button class="btn btn-primary">Save Trading 212 Settings</button>
+        </form>
+        <div class="read-only-note">ⓘ This integration is read-only. It pulls cached data from Trading 212 and can feed your Stocks & Shares ISA value. Credentials are read from <code>.env</code>.</div>
+        <div class="three-stat mt-3">
+            <div><span>Credentials</span><strong class="{{ 'positive' if t212_credentials_present else 'negative' }}">{{ 'Ready' if t212_credentials_present else 'Missing' }}</strong></div>
+            <div><span>Environment</span><strong>{{ t212_settings.environment|capitalize }}</strong></div>
+            <div><span>Last Sync</span><strong class="small-value">{{ t212_settings.last_sync_at or 'Never' }}</strong></div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <form method="post" action="{{ url_for('trading212_test_connection') }}"><button class="btn btn-outline-primary">Test Connection</button></form>
+            <form method="post" action="{{ url_for('trading212_sync_now') }}"><button class="btn btn-success">Sync Now</button></form>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-title"><h3>Trading 212 Sync Log</h3><span class="pill">Latest 12</span></div>
+        {% for log in t212_logs %}
+            <div class="sync-row"><span class="sync-check {{ 'ok' if log.status == 'success' else 'bad' }}">{{ '✓' if log.status == 'success' else '!' }}</span><div><strong>{{ log.status|capitalize }}</strong><small>{{ log.message }}</small></div><time>{{ log.synced_at }}</time></div>
+        {% else %}
+            <p class="muted mb-0">No sync logs yet.</p>
+        {% endfor %}
+    </section>
+</div>
 {% endblock %}
