@@ -5,7 +5,7 @@
 
 InvestHome is a self-hosted personal finance dashboard built with **Python**, **Flask** and **SQLite**. It is designed for homelab-style deployments where you want to own your own data and track the bits that most personal finance apps do not handle cleanly.
 
-![InvestHome modern dashboard](docs/screenshots/dashboard-modern-ui.png)
+
 
 ## What it tracks
 
