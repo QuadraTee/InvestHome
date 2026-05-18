@@ -1,12 +1,11 @@
-# InvestHome Finance Tracker v2.6.0
+# InvestHome Finance Tracker v2.6.1
 
 > **AI SLOP WARNING**  
 > Built by a Network Engineer who has no business pretending to be a full-stack developer.
 
 InvestHome is a self-hosted personal finance dashboard built with **Python**, **Flask** and **SQLite**. It is designed for homelab-style deployments where you want to own your own data and track the bits that most personal finance apps do not handle cleanly.
 
-DEMO Database
-![alt text](https://raw.githubusercontent.com/domclifton/InvestHome/refs/heads/main/Screenshot%202026-05-17%20193101.png "Logo Title Text 1")
+![InvestHome modern dashboard](docs/screenshots/dashboard-modern-ui.png)
 
 ## What it tracks
 
@@ -24,7 +23,7 @@ DEMO Database
 ## Current version
 
 ```text
-v2.6.0
+v2.6.1
 ```
 
 Highlights in this version:

@@ -1,3 +1,8 @@
+
+## v2.6.1 - Bug fixes
+- Fixed couple budget add/edit stream selectors so saved person names are displayed instead of generic Person 1 / Person 2 labels.
+- Fixed dashboard investment growth to use the same opening-balance contribution baseline as the performance charts, preventing imported balances being counted as growth.
+
 v2.6.0 - Minor
 - Added safe page prefetching to make sidebar/page navigation feel faster.
 - Pages are prefetched on hover/touch and common pages are prefetched shortly after initial load.

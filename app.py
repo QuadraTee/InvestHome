@@ -16,7 +16,7 @@ DB_NAME = os.path.join(APP_DIR, "finance.db")
 GOLDAPI_KEY = os.getenv("GOLDAPI_KEY", "").strip()
 TRADING212_API_KEY = os.getenv("TRADING212_API_KEY", "").strip()
 TRADING212_API_SECRET = os.getenv("TRADING212_API_SECRET", "").strip()
-APP_VERSION = "2.6.0"
+APP_VERSION = "2.6.1"
 
 app = Flask(__name__)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
@@ -516,24 +516,16 @@ def performance_rows(conn, pension_only=False):
     total_current = total_contributions = total_growth = 0.0
 
     for account in accounts:
-        tx = conn.execute(
-            """
-            SELECT
-                COALESCE(SUM(CASE WHEN transaction_type IN ('add', 'remove') THEN amount ELSE 0 END), 0) AS net_contributions,
-                COALESCE(SUM(CASE WHEN transaction_type = 'value_update' THEN amount ELSE 0 END), 0) AS valuation_changes
-            FROM transactions
-            WHERE account_id = ?
-            """,
-            (account["id"],),
-        ).fetchone()
-
         current = float(account["current_value"] or 0)
-        contributions = float(tx["net_contributions"] or 0)
 
-        # Physical Bullion is itemised; use purchase cost as its contribution baseline.
+        # Use the same contribution/cost-basis baseline as the performance charts.
+        # This prevents imported/opening balances from being counted as growth on
+        # the dashboard when no matching add/remove transaction exists yet.
         if account["account_type"] == "Physical Bullion":
             bullion_cost = conn.execute("SELECT COALESCE(SUM(purchase_price), 0) AS cost FROM bullion").fetchone()["cost"]
             contributions = float(bullion_cost or 0)
+        else:
+            contributions = _performance_contribution_baseline(conn, account)
 
         growth = current - contributions
         growth_pct = (growth / contributions * 100) if contributions else 0

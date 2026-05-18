@@ -126,13 +126,17 @@
             <h5>Add Budget Topic</h5>
             <form method="post" action="{{ url_for('add_couple_budget_item') }}" class="row g-2">
                 <div class="col-md-3">
-                    <select class="form-select" name="stream"><option>Joint</option><option>Person 1</option><option>Person 2</option></select>
+                    <select class="form-select" name="stream">
+                        <option value="Joint">Joint</option>
+                        <option value="Person 1">{{ couple_settings.person_one_name }}</option>
+                        <option value="Person 2">{{ couple_settings.person_two_name }}</option>
+                    </select>
                 </div>
                 <div class="col-md-5"><input class="form-control" name="name" placeholder="Mortgage / Bills / Savings" required></div>
                 <div class="col-md-2"><input class="form-control" type="number" step="0.01" name="amount" placeholder="1250.00" required></div>
                 <div class="col-md-2"><button class="btn btn-primary w-100">Add</button></div>
             </form>
-            <div class="small-help">Use streams to split Joint, Person 1, and Person 2 spending.</div>
+            <div class="small-help">Use streams to split Joint, {{ couple_settings.person_one_name }}, and {{ couple_settings.person_two_name }} spending.</div>
         </div>
     </div>
 </div>
@@ -157,7 +161,13 @@
                 <tr>
                     <td colspan="4">
                         <form method="post" action="{{ url_for('update_couple_budget_item', item_id=item.id) }}" class="row g-2 align-items-center">
-                            <div class="col-md-2"><select class="form-select" name="stream">{% for stream in ['Joint','Person 1','Person 2'] %}<option {% if item.stream == stream %}selected{% endif %}>{{ stream }}</option>{% endfor %}</select></div>
+                            <div class="col-md-2">
+                                <select class="form-select" name="stream">
+                                    <option value="Joint" {% if item.stream == 'Joint' %}selected{% endif %}>Joint</option>
+                                    <option value="Person 1" {% if item.stream == 'Person 1' %}selected{% endif %}>{{ couple_settings.person_one_name }}</option>
+                                    <option value="Person 2" {% if item.stream == 'Person 2' %}selected{% endif %}>{{ couple_settings.person_two_name }}</option>
+                                </select>
+                            </div>
                             <div class="col-md-5"><input class="form-control" name="name" value="{{ item.name }}" required></div>
                             <div class="col-md-2"><input class="form-control" type="number" step="0.01" name="amount" value="{{ item.amount }}" required></div>
                             <div class="col-md-3 d-flex gap-2"><button class="btn btn-success flex-fill">Save</button><button form="delete-couple-budget-{{ item.id }}" class="btn btn-outline-danger flex-fill">Delete</button></div>
