@@ -1,4 +1,4 @@
-# InvestHome Finance Tracker v2.6.9
+# InvestHome Finance Tracker v2.7.2
 
 > **AI SLOP WARNING**  
 > Built by a Network Engineer who has no business pretending to be a full-stack developer.
